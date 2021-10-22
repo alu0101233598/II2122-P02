@@ -7,6 +7,7 @@
 ## Tabla de contenidos <!-- omit in toc -->
 - [Ejercicio 1](#ejercicio-1)
 - [Ejercicio 2](#ejercicio-2)
+- [Ejercicio 3](#ejercicio-3)
 
 ## Ejercicio 1
 
@@ -57,3 +58,32 @@ El comportamiento es el mismo que el explicado en el apartado D. La esfera y el 
 ![Apartado G](img/img8.gif)
 
 ## Ejercicio 2
+
+Para la resolución de este ejercicio, se dispone de una escena donde se encuentran el cubo y plano utiliziado en el ejercicio anterior. En primer lugar, es necesaria la creación de un nuevo eje virtual para el giro del jugador sobre el eje OY. Para ello, accedemos al panel de configuración de entrada ubicado en `Edit > Project Settings > Input Manager` y creamos el eje "Up":
+
+![Input Manager](img/img9.png)
+
+Con esta nueva entrada configurada, podemos proceder a la creación del script CharacterController.cs, encargado de detectar las acciones del jugador y aplicar el movimiento que corresponda al cubo:
+
+```csharp
+public class CharacterController : MonoBehaviour
+{
+    public float translationSpeed = 5f;
+    public float rotationSpeed = 100f;
+    
+    void Update()
+    {
+        float horizontalMove = Input.GetAxis("Horizontal") * translationSpeed * Time.deltaTime;
+        float verticalMove = Input.GetAxis("Vertical") * translationSpeed * Time.deltaTime;
+        float upMove = Input.GetAxis("Up") * rotationSpeed * Time.deltaTime;
+        transform.Translate(new Vector3(horizontalMove, 0f, verticalMove));
+        transform.Rotate(new Vector3(0f, upMove, 0f));
+    }
+}
+```
+
+En el siguiente vídeo, se muestra el resultado obtenido al ejecutar el programa:
+
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Lqj6ouJ0g54" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## Ejercicio 3
