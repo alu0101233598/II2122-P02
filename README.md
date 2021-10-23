@@ -47,7 +47,7 @@ El comportamiento es el mismo que el estudiado en el apartado B, puesto que el c
 
 > f) La esfera tiene físicas, el cubo es de tipo IsTrigger y tiene físicas
 
-El cubo en esta ocasión cae, al tener asignado un componente Rigidbody. Puesto que también posee un Colilder de tipo trigger, no colisiona con el plano y lo atraviesa. La esfera mantiene el comportamiento definido en apartados anteriores.
+El cubo en esta ocasión cae, al tener asignado un componente Rigidbody. Puesto que también posee un Collider de tipo trigger, no colisiona con el plano y lo atraviesa. La esfera mantiene el comportamiento definido en apartados anteriores.
 
 ![Apartado F](img/img7.gif)
 
