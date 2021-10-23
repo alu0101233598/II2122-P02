@@ -84,7 +84,7 @@ public class CharacterController : MonoBehaviour
 
 En el siguiente vídeo, se muestra el resultado obtenido al ejecutar el programa:
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/Lqj6ouJ0g54/0.jpg)](http://www.youtube.com/watch?v=Lqj6ouJ0g54)
+[![IMAGE ALT TEXT](img/img10.png)](http://www.youtube.com/watch?v=Lqj6ouJ0g54)
 
 ## Ejercicio 3
 
