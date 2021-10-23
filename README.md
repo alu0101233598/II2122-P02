@@ -84,6 +84,7 @@ public class CharacterController : MonoBehaviour
 
 En el siguiente vídeo, se muestra el resultado obtenido al ejecutar el programa:
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Lqj6ouJ0g54" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/Lqj6ouJ0g54/0.jpg)](http://www.youtube.com/watch?v=Lqj6ouJ0g54)
 
 ## Ejercicio 3
+
