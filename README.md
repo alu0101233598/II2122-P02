@@ -73,11 +73,11 @@ public class CharacterController : MonoBehaviour
     
     void Update()
     {
-        float horizontalMove = Input.GetAxis("Horizontal") * translationSpeed * Time.deltaTime;
-        float verticalMove = Input.GetAxis("Vertical") * translationSpeed * Time.deltaTime;
-        float upMove = Input.GetAxis("Up") * rotationSpeed * Time.deltaTime;
-        transform.Translate(new Vector3(horizontalMove, 0f, verticalMove));
-        transform.Rotate(new Vector3(0f, upMove, 0f));
+        float horizontalMove = Input.GetAxis("Horizontal");
+        float verticalMove = Input.GetAxis("Vertical");
+        float upMove = Input.GetAxis("Up");
+        transform.Translate(new Vector3(horizontalMove, 0f, verticalMove) * translationSpeed * Time.deltaTime);
+        transform.Rotate(new Vector3(0f, upMove, 0f) * rotationSpeed * Time.deltaTime);
     }
 }
 ```
@@ -88,3 +88,236 @@ En el siguiente vídeo, se muestra el resultado obtenido al ejecutar el programa
 
 ## Ejercicio 3
 
+En este ejercicio, se pide resolver una serie de cuestiones relacionadas con el desarrollo de scripts:
+
+> a) Cada vez que el jugador colisione con un cilindro, deben aumentar su tamaño y el jugador aumentar puntuación
+
+Partiendo de la escena anterior, se desarrolló en primer lugar un objeto que actuase como gestor de la puntuación del juego, denominado GameManager. Para implementar la lógica de este actor, se desarrolló el siguiente script:
+
+```csharp
+public class GameManager : MonoBehaviour
+{
+    public static GameManager instance = null;
+    public Text scoreText;
+
+    private int score = 0;
+
+    void Awake()
+    {
+        if (instance == null) instance = this;
+        else if (instance != this) Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        scoreText.text = score.ToString();
+    }
+
+    public void updateScore(int amount)
+    {
+        score += amount;
+        scoreText.text = score.ToString();
+    }
+}
+```
+
+Con el script anterior, es posible acceder al método encargado de aumentar la puntuación utilizando la expresión `GameManager.instance.updateScore()`. Una vez resuelta esta cuestión, se procedió a la creación de un script `CylinderBehaviour.cs` que gestionase el comportamiento de los cilindros:
+
+```csharp
+public class CylinderBehaviour : MonoBehaviour
+{
+    [Header("General")]
+    public float growSpeed = 0.5f;
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            GameManager.instance.updateScore(1);
+            transform.localScale += new Vector3(growSpeed, growSpeed, growSpeed);
+        }    
+    }
+}
+```
+
+>  b) Agregar cilindros de tipo A, en los que además, si el jugador pulsa la barra espaciadora lo mueve hacia fuera de él.
+
+Para considerar este nuevo tipo de cilindro, se actualizó el script `CylinderBehaviour.cs`:
+
+```csharp
+public class CylinderBehaviour : MonoBehaviour
+{
+    [Header("General")]
+    public float growSpeed = 0.5f;
+
+    [Header("Cylinder A")]
+    public bool isTypeA = false;
+    public float repelSpeed = 5f;
+
+    private Rigidbody rb;
+    private GameObject player;
+    
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        player = GameObject.FindWithTag("Player");
+    }
+
+    void Update()
+    {
+        if ((Input.GetKeyDown("space") && isTypeA))
+        {
+            repel();
+        }
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            GameManager.instance.updateScore(1);
+            transform.localScale += new Vector3(growSpeed, growSpeed, growSpeed);
+        }    
+    }
+
+    private void repel()
+    {
+        Vector3 forceDirection = Vector3.Normalize(transform.position - player.transform.position);
+        rb.AddForce(forceDirection * repelSpeed);
+    }
+}
+```
+
+> c) Agregar cilindros de tipo B que se alejen del jugador cuando esté próximo
+
+Para considerar este nuevo tipo de cilindro, se actualizó el script `CylinderBehaviour.cs`:
+
+```csharp
+public class CylinderBehaviour : MonoBehaviour
+{
+    [Header("General")]
+    public float growSpeed = 0.5f;
+
+    [Header("Cylinder A")]
+    public bool isTypeA = false;
+    public float repelSpeed = 5f;
+
+    [Header("Cylinder B")]
+    public bool isTypeB = false;
+    public float triggerDistance = 5f;
+
+    private Rigidbody rb;
+    private GameObject player;
+    
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        player = GameObject.FindWithTag("Player");
+    }
+
+    void Update()
+    {
+        if ((Input.GetKeyDown("space") && isTypeA))
+        {
+            repel();
+        }
+        else if (isTypeB)
+        {
+            float distance = Vector3.Distance(player.transform.position, transform.position);
+            if (distance <= triggerDistance) repel();
+        }
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            GameManager.instance.updateScore(1);
+            transform.localScale += new Vector3(growSpeed, growSpeed, growSpeed);
+        }    
+    }
+
+    private void repel()
+    {
+        Vector3 forceDirection = Vector3.Normalize(transform.position - player.transform.position);
+        rb.AddForce(forceDirection * repelSpeed);
+    }
+}
+```
+
+> d) Ubicar un tercer objeto que sea capaz de detectar colisiones y que se mueva con las teclas: I, L, J, M
+
+Para crear este nuevo objeto, se definió una nueva pareja de ejes virtuales; copia de los ejes "Horizontal" y "Vertical" utilizados anteriormente, pero asignando las teclas I, L, J y M a los mismos. Aprovechando que este nuevo objeto tiene asignado un Rigidbody (puesto que es necesario para la detección de colisiones), el movimiento del agente utiliza la función `rb.MovePosition()` de la siguiente forma:
+
+```csharp
+    public float translationSpeed = 5f;
+    
+    private Rigidbody rb;
+    private Renderer renderer;
+
+    void Awake() {
+        rb = GetComponent<Rigidbody>();
+        renderer = GetComponent<Renderer>();
+    }
+
+    void FixedUpdate()
+    {
+        Vector3 mInput = new Vector3(Input.GetAxis("OtherHorizontal"), 0f, Input.GetAxis("OtherVertical"));
+        rb.MovePosition(rb.position + (mInput * Time.deltaTime * translationSpeed));
+    }
+```
+
+Cada vez que se detecta una colisión, se llama al método `OnCollisionEnter()`. Para mostrar de forma visual que se ha producido un impacto, se cambia el color del material asignado al GameObject:
+
+```csharp
+    void OnCollisionEnter(Collision other) {
+        if (other.gameObject.tag != "Floor") {
+            Debug.Log("Collisioned with " + other.gameObject.name);
+            renderer.material.color = Color.HSVToRGB(Random.value, 0.5f, 0.9f);
+        }
+    }
+```
+
+> e) Debes ubicar cubos que aumentan de tamaño cuando se le acerca una esfera y que disminuye cuando se le acerca el jugador
+
+Para detectar cuándo un objeto se acerca al cubo, se eliminó el collider por defecto asociado al mismo y se le asignó uno en forma de esfera, asignado con la propiedad isTrigger:
+
+![Cubo con el collider esférico](img/img11.png)
+
+A este objeto, se le asignó el siguiente script `CubeBehaviour.cs`:
+
+```csharp
+public class CubeBehaviour : MonoBehaviour
+{
+    public float scaleSpeed = 1.5f;
+
+    private SphereCollider collider;
+    private float radius;
+    private Vector3 originalSize;
+
+    void Awake()
+    {
+        collider = GetComponent<SphereCollider>();
+        originalSize = transform.localScale;
+        radius = collider.radius * originalSize.x;
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Sphere" || other.gameObject.tag == "Player") {
+            float distance = Vector3.Distance(other.gameObject.transform.position, transform.position);
+            if (distance < radius)
+            {
+                float scaleAmount = (other.gameObject.tag == "Player" ? -1 : 1) * (1 - distance / radius) * scaleSpeed;
+                transform.localScale = new Vector3(originalSize.x + scaleAmount, originalSize.y + scaleAmount, originalSize.z + scaleAmount);
+            }
+        }
+    }
+}
+```
+
+> Demostración del funcionamiento
+
+El funcionamiento de los distintos requisitos de este ejercicio puede apreciarse en el siguiente vídeo:
+
+[![Vídeo YouTube](img/img12.png)](https://youtu.be/rjmOIxd8j5U)
